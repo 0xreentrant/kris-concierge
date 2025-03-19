@@ -9,4 +9,5 @@ declare module "react-router" {
 type Params = {
   "/": {};
   "/api/calendar": {};
+  "/api/chat": {};
 };
