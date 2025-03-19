@@ -153,6 +153,7 @@
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 0.5rem;
+  position: relative;
 }
 
 .event-item:hover {
@@ -171,6 +172,11 @@
   color: #333;
   font-size: 1.1rem;
   width: 100%;
+}
+
+.event-calendar {
+  font-weight: 500;
+  margin-top: 0.25rem;
 }
 
 .error {

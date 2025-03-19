@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
+import calendarConfig from '../config/calendars.json';
 
 type CalendarEvent = {
   id: string;
   summary: string;
   start: { dateTime?: string; date?: string };
   end?: { dateTime?: string; date?: string };
+  calendarId: string;
+  calendarName: string;
+  calendarColor: string;
 };
 
 type EventsByDay = {
@@ -48,7 +52,7 @@ export function Dashboard() {
       hour: '2-digit', 
       minute: '2-digit',
       hour12: true,
-      timeZone: 'America/New_York'
+      timeZone: calendarConfig.timeZone
     });
   };
 
@@ -58,7 +62,7 @@ export function Dashboard() {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
-      timeZone: 'America/New_York'
+      timeZone: calendarConfig.timeZone
     });
   };
 
@@ -76,7 +80,7 @@ export function Dashboard() {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
       const dayKey = date.toLocaleDateString('en-US', { 
-        timeZone: 'America/New_York',
+        timeZone: calendarConfig.timeZone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
@@ -91,7 +95,7 @@ export function Dashboard() {
       
       const date = new Date(dateStr);
       const dayKey = date.toLocaleDateString('en-US', { 
-        timeZone: 'America/New_York',
+        timeZone: calendarConfig.timeZone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
@@ -157,9 +161,16 @@ export function Dashboard() {
                   <h3 className="day-header">{formatDayHeader(day)}</h3>
                   <ul>
                     {eventsByDay[day].map(event => (
-                      <li key={event.id} className="event-item">
+                      <li 
+                        key={event.id} 
+                        className="event-item"
+                        style={{ borderLeft: `4px solid ${event.calendarColor}` }}
+                      >
                         <span className="event-summary">{event.summary}</span>
                         <span className="event-time">{formatEventDate(event)}</span>
+                        <span className="event-calendar" style={{ color: event.calendarColor, fontSize: '0.8rem' }}>
+                          {event.calendarName}
+                        </span>
                       </li>
                     ))}
                   </ul>
