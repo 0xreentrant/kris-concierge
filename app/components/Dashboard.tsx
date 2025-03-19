@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import calendarConfig from '../config/calendars.json';
+import { Chat } from './Chat';
 
 type CalendarEvent = {
   id: string;
@@ -21,6 +22,7 @@ export function Dashboard() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [weekRange, setWeekRange] = useState<{ start: string; end: string } | null>(null);
   
   const mockData = {
     spending: {
@@ -121,6 +123,7 @@ export function Dashboard() {
         }
 
         setEvents(data.events || []);
+        setWeekRange(data.weekRange || null);
       } catch (err) {
         setError('Failed to fetch calendar events');
         console.error('Error fetching calendar events:', err);
@@ -142,7 +145,7 @@ export function Dashboard() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>WEEKLY FINANCIAL CHECK-IN: {currentDate}</h1>
+        <h1>WEEKLY FINANCIAL CHECK-IN: {weekRange ? `Week of ${new Date(weekRange.start).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${new Date(weekRange.end).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}` : currentDate}</h1>
       </header>
 
       <section className="dashboard-section">
@@ -248,6 +251,11 @@ export function Dashboard() {
             ))}
           </ul>
         </div>
+      </section>
+
+      <section className="dashboard-section">
+        <h2>AI ASSISTANT</h2>
+        <Chat />
       </section>
     </div>
   );

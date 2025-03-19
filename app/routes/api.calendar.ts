@@ -1,7 +1,6 @@
 import { calendar_v3, google } from 'googleapis';
 import type { Route } from './+types/api.calendar';
 import calendarConfig from '../config/calendars.json';
-import ICAL from 'ical.js';
 
 function extractCalendarIdFromUrl(url: string): string | null {
   try {
@@ -18,45 +17,6 @@ function extractCalendarIdFromUrl(url: string): string | null {
     console.error('Error parsing calendar URL:', error);
   }
   return null;
-}
-
-async function fetchICalEvents(url: string, timeMin: Date, timeMax: Date, timeZone: string) {
-  try {
-    const response = await fetch(url);
-    const icalData = await response.text();
-    const jcalData = ICAL.parse(icalData);
-    const comp = new ICAL.Component(jcalData);
-    const vevents = comp.getAllSubcomponents('vevent');
-
-    return vevents.map(vevent => {
-      const event = new ICAL.Event(vevent);
-      const start = event.startDate.toJSDate();
-      const end = event.endDate.toJSDate();
-
-      // Filter events outside the time range
-      if (start > timeMax || end < timeMin) {
-        return null;
-      }
-
-      return {
-        id: event.uid,
-        summary: event.summary,
-        start: {
-          dateTime: start.toISOString(),
-          timeZone: timeZone
-        },
-        end: {
-          dateTime: end.toISOString(),
-          timeZone: timeZone
-        },
-        description: event.description,
-        location: event.location
-      };
-    }).filter(event => event !== null);
-  } catch (error) {
-    console.error('Error fetching iCal events:', error);
-    return [];
-  }
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -89,52 +49,34 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     const calendarPromises = enabledCalendars.map(async (cal) => {
       try {
-        if (cal.type === 'ical' && cal.url) {
-          console.log(`Fetching iCal events for calendar: ${cal.name}`);
-          const events = await fetchICalEvents(
-            cal.url,
-            startOfWeek,
-            endOfWeek,
-            cal.timeZone || calendarConfig.timeZone
-          );
-          
-          return events.map(event => ({
-            ...event,
-            calendarId: cal.id,
-            calendarName: cal.name,
-            calendarColor: cal.color,
-            calendarTimeZone: cal.timeZone || calendarConfig.timeZone
-          }));
-        } else {
-          // Handle Google Calendar
-          const calendarId = cal.url ? extractCalendarIdFromUrl(cal.url) : cal.id;
-          if (!calendarId) {
-            console.error(`Invalid calendar configuration for ${cal.name}`);
-            return [];
-          }
-
-          console.log(`Fetching Google Calendar events for: ${cal.name} (ID: ${calendarId})`);
-          const response = await calendar.events.list({
-            calendarId,
-            timeMin: startOfWeek.toISOString(),
-            timeMax: endOfWeek.toISOString(),
-            singleEvents: true,
-            orderBy: 'startTime',
-            timeZone: cal.timeZone || calendarConfig.timeZone,
-            maxResults: 250
-          });
-
-          const events = response.data.items || [];
-          console.log(`Found ${events.length} events for calendar ${cal.name}`);
-          
-          return events.map(event => ({
-            ...event,
-            calendarId: cal.id,
-            calendarName: cal.name,
-            calendarColor: cal.color,
-            calendarTimeZone: cal.timeZone || calendarConfig.timeZone
-          }));
+        // Handle Google Calendar
+        const calendarId = cal.url ? extractCalendarIdFromUrl(cal.url) : cal.id;
+        if (!calendarId) {
+          console.error(`Invalid calendar configuration for ${cal.name}`);
+          return [];
         }
+
+        console.log(`Fetching Google Calendar events for: ${cal.name} (ID: ${calendarId})`);
+        const response = await calendar.events.list({
+          calendarId,
+          timeMin: startOfWeek.toISOString(),
+          timeMax: endOfWeek.toISOString(),
+          singleEvents: true,
+          orderBy: 'startTime',
+          timeZone: cal.timeZone || calendarConfig.timeZone,
+          maxResults: 250
+        });
+
+        const events = response.data.items || [];
+        console.log(`Found ${events.length} events for calendar ${cal.name}`);
+        
+        return events.map(event => ({
+          ...event,
+          calendarId: cal.id,
+          calendarName: cal.name,
+          calendarColor: cal.color,
+          calendarTimeZone: cal.timeZone || calendarConfig.timeZone
+        }));
       } catch (error) {
         console.error(`Error fetching events from calendar ${cal.name}:`, error);
         if (error instanceof Error) {
@@ -167,7 +109,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     return { 
-      events: allDays
+      events: allDays,
+      weekRange: {
+        start: startOfWeek.toISOString(),
+        end: endOfWeek.toISOString()
+      }
     };
   } catch (error) {
     console.error('Error fetching calendar events:', error);

@@ -6,31 +6,6 @@
       "color": "#4285f4",
       "enabled": true,
       "type": "google"
-    },
-    {
-      "id": "primary",
-      "name": "Primary Calendar",
-      "color": "#34a853",
-      "enabled": true,
-      "type": "google"
-    },
-    {
-      "id": "j3nsnrm05f5h86jsl6k14iv87c@group.calendar.google.com",
-      "name": "Group Calendar",
-      "color": "#ea4335",
-      "enabled": true,
-      "type": "google",
-      "url": "https://calendar.google.com/calendar/embed?src=j3nsnrm05f5h86jsl6k14iv87c%40group.calendar.google.com&ctz=America%2FDenver",
-      "timeZone": "America/Denver"
-    },
-    {
-      "id": "example-ical",
-      "name": "Example iCal Calendar",
-      "color": "#fbbc05",
-      "enabled": true,
-      "type": "ical",
-      "url": "https://example.com/calendar.ics",
-      "timeZone": "America/New_York"
     }
   ],
   "defaultCalendarId": "alexanderlperez@gmail.com",
