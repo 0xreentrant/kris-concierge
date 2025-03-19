@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './Chat.css';
 
 type Message = {
@@ -88,7 +89,9 @@ export function Chat() {
             key={index}
             className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}
           >
-            <div className="message-content">{message.content}</div>
+            <div className="message-content">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
             <div className="message-timestamp">
               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
